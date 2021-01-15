@@ -1,7 +1,12 @@
 # rn
 research note
 
-#STCM analysis
+#make grid files
+xyz2grd.sh
+ please change GridInt and awk positions
+
+
+#STCM analysis---------------------------------------
 based on STCMkit.
 this codes are for the support to use STCMkit.
 
