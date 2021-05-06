@@ -24,20 +24,17 @@ dg = pd.DataFrame(index=[], columns=cols2)
 
 lam=np.arange(1,1000)/1000
 for l in range(0,100,1): #(0,100,1)
-    cross_lam=l/100
+    cross_lam=l/100 # pore fluid pressure
     for k in range(20,36,1):  #(20,36,1)
-        phi=k
+        phi=k #internal friction
         for j in range(1,6,1):
             alpha=j #slope angle    
             for i in range(1,6,1):
                 #initial parameters ---
-                beta=i #slope angle
-                
-                
-                
-                #internal friction
-                mu=np.tan(np.radians(phi))
+                beta=i #basal dip angle
+
                 #radians
+                mu=np.tan(np.radians(phi))
                 alpha_r=np.radians(alpha)
                 beta_r=np.radians(beta)
                 phi_r=np.radians(phi)
@@ -63,10 +60,10 @@ for l in range(0,100,1): #(0,100,1)
                 mbc2=np.where(psi2==np.nan,np.nan,np.tan(tandi_bc2)*(1-lam))
                 lamlam=np.where(psi1==np.nan,np.nan,lam)
                 
-                #calc cross point
+                #calc cross point, critical taper rim vs pore fluid pressure
                 co=np.stack((lamlam,mbc1,mbc2))
                 com=pd.DataFrame(co.T,columns=['lamda','mbc_comp','mbc_ext'])
-                comcoo=com[com["lamda"] == cross_lam] #一致行の抽出
+                comcoo=com[com["lamda"] == cross_lam]
                 
                 #df = df.append(comcoo, ignore_index=True)
                 
@@ -78,12 +75,11 @@ for l in range(0,100,1): #(0,100,1)
                 df = df.append(ef, ignore_index=True)
                 
                 if i == 5 and j == 5:
-                    #OLS regre
-                    x = pd.get_dummies(df[['alpha','beta']]) # ←もちろん増減可能 
+                    #OLS regression 
+                    x = pd.get_dummies(df[['alpha','beta']])
                     y = df['mbc_comp']
 
                     X = sm.add_constant(x)
-                    
                     model = sm.OLS(y, X)
                     result = model.fit()
                     #print(result.summary())
@@ -96,9 +92,6 @@ for l in range(0,100,1): #(0,100,1)
                     
                     dg=dg.append(gg,ignore_index=True)        
                 break
-                #plot
                 
 df.to_csv('result_ct.csv', float_format="%.5f",header=True, index=False);
 dg.to_csv('result_ols.csv', float_format="%.5f",header=True, index=False);
-
-                # print(comcoo)
