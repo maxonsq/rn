@@ -12,15 +12,10 @@ import statsmodels.api as sm
 
 
 #initial parameters ---
-phi=20.00 #internal friction angle
 rho=2700 #dencity of bulk
 rhow=1050 #dencity of water
 
-#
-cross_lam=0.80
-
 #calcs tart
-
 cols = ['lamda','mbc_comp','mbc_ext','alpha','beta','phi','rho','rhow']
 df = pd.DataFrame(index=[], columns=cols)
 
