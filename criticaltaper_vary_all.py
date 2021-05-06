@@ -16,6 +16,7 @@ rho=2700 #dencity of bulk
 rhow=1050 #dencity of water
 
 #calcs tart
+
 cols = ['lamda','mbc_comp','mbc_ext','alpha','beta','phi','rho','rhow']
 df = pd.DataFrame(index=[], columns=cols)
 
@@ -23,18 +24,19 @@ cols2 = ['phi','lamda','coeff_weight_alpha','R2']
 dg = pd.DataFrame(index=[], columns=cols2)
 
 lam=np.arange(1,1000)/1000
-for l in range(0,100,1): #(0,100,1)
+for l in range(1,100,1): #(0,100,1)
     cross_lam=l/100 # pore fluid pressure
-    for k in range(20,36,1):  #(20,36,1)
-        phi=k #internal friction
+    for k in range(20,22,1):  #(20,36,1)
+        phi=k #internal friction angle
         for j in range(1,6,1):
             alpha=j #slope angle    
             for i in range(1,6,1):
                 #initial parameters ---
                 beta=i #basal dip angle
-
-                #radians
+                
+                #internal friction
                 mu=np.tan(np.radians(phi))
+                #radians
                 alpha_r=np.radians(alpha)
                 beta_r=np.radians(beta)
                 phi_r=np.radians(phi)
@@ -44,7 +46,7 @@ for l in range(0,100,1): #(0,100,1)
                 C=left * right
                 alpha_p=np.arctan(C)
                 
-                # calc critical taper
+                #calc critical taper
                 psi1=np.where( (np.sin(alpha_p)/np.sin(phi_r) - 1) > 0, np.nan, 0.5*np.arcsin(np.sin(alpha_p)/np.sin(phi_r))-0.5*np.sin(alpha_p))
                 psi2=np.where( (np.sin(alpha_p)/np.sin(phi_r) - 1) >0, np.nan,0.5*(np.pi-np.arcsin(np.sin(alpha_p)/np.sin(phi_r)))-0.5*np.sin(alpha_p))
                 
@@ -63,35 +65,33 @@ for l in range(0,100,1): #(0,100,1)
                 #calc cross point, critical taper rim vs pore fluid pressure
                 co=np.stack((lamlam,mbc1,mbc2))
                 com=pd.DataFrame(co.T,columns=['lamda','mbc_comp','mbc_ext'])
-                comcoo=com[com["lamda"] == cross_lam]
-                
-                #df = df.append(comcoo, ignore_index=True)
+                comcoo=com[com["lamda"] == cross_lam] 
                 
                 ff=pd.DataFrame(data=np.array([cross_lam,alpha,beta,phi,rho,rhow])).T
                 ff.columns=['lamda','alpha','beta','phi','rho','rhow']
-                
                 ef=pd.merge(comcoo,ff)
                 
+                #append the result values
                 df = df.append(ef, ignore_index=True)
                 
-                if i == 5 and j == 5:
-                    #OLS regression 
-                    x = pd.get_dummies(df[['alpha','beta']])
-                    y = df['mbc_comp']
+            #OLS regre
+            x = pd.get_dummies(df[['alpha','beta']]) 
+            y = df['mbc_comp']
+            X = sm.add_constant(x)
+                    
+            model = sm.OLS(y, X)
+            result = model.fit()
+            #print(result.summary())
+                    
+            Ca=result.params.alpha/(result.params.alpha + result.params.beta)*100
+            R2=result.rsquared
+                    
+            gg=pd.DataFrame(data=np.array([phi,cross_lam,Ca,R2])).T
+            gg.columns=cols2
+                    
+            dg = dg.append(gg, ignore_index=True)
 
-                    X = sm.add_constant(x)
-                    model = sm.OLS(y, X)
-                    result = model.fit()
-                    #print(result.summary())
-                    
-                    Ca=result.params.alpha/(result.params.alpha + result.params.beta)*100
-                    R2=result.rsquared
-                    
-                    gg=pd.DataFrame(data=np.array([phi,cross_lam,Ca,R2])).T
-                    gg.columns=['phi','lamda','coeff_weight_alpha','R2']
-                    
-                    dg=dg.append(gg,ignore_index=True)        
-                break
-                
 df.to_csv('result_ct.csv', float_format="%.5f",header=True, index=False);
 dg.to_csv('result_ols.csv', float_format="%.5f",header=True, index=False);
+
+                # print(comcoo)
