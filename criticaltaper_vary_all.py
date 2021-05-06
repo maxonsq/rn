@@ -24,8 +24,9 @@ cols2 = ['phi','lamda','coeff_weight_alpha','R2']
 dg = pd.DataFrame(index=[], columns=cols2)
 
 lam=np.arange(1,1000)/1000
-for l in range(1,100,1): #(0,100,1)
+for l in range(1,101,1): #(0,100,1)
     cross_lam=l/100 # pore fluid pressure
+    ddf = pd.DataFrame(index=[], columns=cols)        
     for k in range(20,36,1):  #(20,36,1)
         phi=k #internal friction angle
         for j in range(1,6,1):
@@ -72,11 +73,12 @@ for l in range(1,100,1): #(0,100,1)
                 ef=pd.merge(comcoo,ff)
                 
                 #append the result values
+                ddf = ddf.append(ef, ignore_index=True)
                 df = df.append(ef, ignore_index=True)
                 
             #OLS regre
-        x = pd.get_dummies(df[['alpha','beta']]) 
-        y = df['mbc_comp']
+        x = pd.get_dummies(ddf[['alpha','beta']]) 
+        y = ddf['mbc_comp']
         X = sm.add_constant(x)
                     
         model = sm.OLS(y, X)
