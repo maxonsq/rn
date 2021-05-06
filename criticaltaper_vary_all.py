@@ -26,7 +26,7 @@ dg = pd.DataFrame(index=[], columns=cols2)
 lam=np.arange(1,1000)/1000
 for l in range(1,100,1): #(0,100,1)
     cross_lam=l/100 # pore fluid pressure
-    for k in range(20,22,1):  #(20,36,1)
+    for k in range(20,36,1):  #(20,36,1)
         phi=k #internal friction angle
         for j in range(1,6,1):
             alpha=j #slope angle    
@@ -75,21 +75,21 @@ for l in range(1,100,1): #(0,100,1)
                 df = df.append(ef, ignore_index=True)
                 
             #OLS regre
-            x = pd.get_dummies(df[['alpha','beta']]) 
-            y = df['mbc_comp']
-            X = sm.add_constant(x)
+        x = pd.get_dummies(df[['alpha','beta']]) 
+        y = df['mbc_comp']
+        X = sm.add_constant(x)
                     
-            model = sm.OLS(y, X)
-            result = model.fit()
+        model = sm.OLS(y, X)
+        result = model.fit()
             #print(result.summary())
                     
-            Ca=result.params.alpha/(result.params.alpha + result.params.beta)*100
-            R2=result.rsquared
+        Ca=result.params.alpha/(result.params.alpha + result.params.beta)*100
+        R2=result.rsquared
                     
-            gg=pd.DataFrame(data=np.array([phi,cross_lam,Ca,R2])).T
-            gg.columns=cols2
+        gg=pd.DataFrame(data=np.array([phi,cross_lam,Ca,R2])).T
+        gg.columns=cols2
                     
-            dg = dg.append(gg, ignore_index=True)
+        dg = dg.append(gg, ignore_index=True)
 
 df.to_csv('result_ct.csv', float_format="%.5f",header=True, index=False);
 dg.to_csv('result_ols.csv', float_format="%.5f",header=True, index=False);
